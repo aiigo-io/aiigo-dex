@@ -1,7 +1,6 @@
 import React from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import DexHeader from '@/components/layout/DexHeader';
-import DexFooter from '@/components/layout/DexFooter';
+import { DexHeader, DexFooter } from '@/components';
 interface LayoutProps {
   children: React.ReactNode;
 }

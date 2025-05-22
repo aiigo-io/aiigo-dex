@@ -6,15 +6,16 @@ type NetworkTokenSelectorProps = {
   tokens: TokenInfo[];
   selectedToken: TokenInfo;
   onSelect: (token: TokenInfo) => void;
+  className?: string;
 };
 
-const NetworkTokenSelector = ({ tokens, selectedToken, onSelect }: NetworkTokenSelectorProps) => {
+export const NetworkTokenSelector = ({ tokens, selectedToken, onSelect, className }: NetworkTokenSelectorProps) => {
   const [open, setOpen] = useState(false);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <div className='flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer hover:bg-[#1a1a1a]'>
+        <div className={`flex items-center justify-center gap-2 border rounded-lg px-3 py-2 cursor-pointer hover:bg-[#1a1a1a] ${className}`}>
           <img src={selectedToken.logo} alt={selectedToken.name} className='w-6 h-6' />
           <span>{selectedToken.name}</span>
         </div>
@@ -45,5 +46,3 @@ const NetworkTokenSelector = ({ tokens, selectedToken, onSelect }: NetworkTokenS
     </Dialog>
   );
 };
-
-export default NetworkTokenSelector;

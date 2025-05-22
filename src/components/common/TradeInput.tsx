@@ -11,7 +11,7 @@ type TradeInputProps = {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
-const TradeInput: React.FC<TradeInputProps> = ({ className, label, children, value, onChange, readonly }) => {
+export const TradeInput: React.FC<TradeInputProps> = ({ className, label, children, value, onChange, readonly }) => {
 
   return <Card className={className}>
     <p className='mb-2 text-[14px] text-[#888888] font-medium'>{label}</p>
@@ -27,5 +27,3 @@ const TradeInput: React.FC<TradeInputProps> = ({ className, label, children, val
     </div>
   </Card>;
 };
-
-export default TradeInput;

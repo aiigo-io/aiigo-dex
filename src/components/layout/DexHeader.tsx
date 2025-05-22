@@ -2,12 +2,11 @@
 
 import Image from "next/image";
 // import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { ConnectWallet } from '@/components/common/ConnectWallet';
+import { ConnectWallet } from '@/components';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-export default function AppHeader() {
+export function DexHeader() {
   const pathname = usePathname();
-  console.log(pathname);
   const menus = [
     {
       label: 'Swap',
@@ -35,7 +34,7 @@ export default function AppHeader() {
                 key={menu.label}
                 href={menu.href}
                 target={menu.target}
-                  className={`relative px-5 py-2 text-sm font-medium rounded-full transition-all duration-200 hover:text-white ${pathname === menu.href ? 'text-white bg-gradient-to-r from-sky-500/10 via-blue-600/10 to-cyan-500/10' : 'text-white/60'}`}
+                  className={`relative px-10 py-2 text-sm font-medium rounded-full transition-all duration-200 hover:text-white ${pathname === menu.href ? 'text-white bg-gradient-to-r from-sky-500/10 via-blue-600/10 to-cyan-500/10' : 'text-white/60'}`}
               >
                 {menu.label}
               </Link>

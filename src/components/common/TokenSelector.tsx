@@ -7,7 +7,7 @@ type TokenSelectorProps = {
   onSelect?: () => void;
 };
 
-const TokenSelector: React.FC<TokenSelectorProps> = ({ className, onSelect }) => {
+export const TokenSelector: React.FC<TokenSelectorProps> = ({ className, onSelect }) => {
   const { isConnected } = useAccount();
 
   return (
@@ -27,5 +27,3 @@ const TokenSelector: React.FC<TokenSelectorProps> = ({ className, onSelect }) =>
     </Button>
   );
 };
-
-export default TokenSelector; 

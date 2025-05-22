@@ -7,8 +7,8 @@ const chainIdAtom = atom(DEFAULT_CHAIN_ID);
 export function useProtocol() {
   const [chainId, setChainId] = useAtom(chainIdAtom);
   const { address: account } = useAccount();
-  const { data: walletClient } = useWalletClient({chainId});
-  const publicClient = usePublicClient({chainId});
+  const { data: walletClient } = useWalletClient();
+  const publicClient = usePublicClient();
 
   return {
     account,

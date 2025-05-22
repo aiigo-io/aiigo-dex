@@ -1,1 +1,2 @@
-import * as chains from './chains';
+export * from './chains';
+export * from './uniswap';

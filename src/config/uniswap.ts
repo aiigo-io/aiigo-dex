@@ -12,3 +12,37 @@ export const UNISWAP_V3_CONTRACTS = {
   quoterV2Address: '0x8910ebAba9D85F6083d72FE11c09952a6AB68861',
   swapRouter02: '0x15a7121488c1bf222a3BC52F2Cc692E3BfD86F57',
 }
+
+export enum FeeAmount {
+  LOWEST = 100,
+  LOW = 500,
+  MEDIUM = 3000,
+  HIGH = 10000,
+}
+
+export const FEE_TIERS = [
+  {
+    label: 'Lowest',
+    value: FeeAmount.LOWEST,
+    tag: '0.01%',
+    tickSpacing: 1,
+  },
+  {
+    label: 'Low',
+    value: FeeAmount.LOW,
+    tag: '0.05%',
+    tickSpacing: 10,
+  },
+  {
+    label: 'Medium',
+    value: FeeAmount.MEDIUM,
+    tag: '0.30%',
+    tickSpacing: 60,
+  },
+  {
+    label: 'High',
+    value: FeeAmount.HIGH,
+    tag: '1.00%',
+    tickSpacing: 200,
+  },
+]

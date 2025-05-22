@@ -1,26 +1,32 @@
 import type { NextPage } from 'next';
 import { Card } from '@radix-ui/themes';
-import { Button } from '@/components/ui/button';
 import { useProtocol, useTokens } from '@/hooks';
-// import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import WAIGO_ABI from '@/config/abi/WAIGO.json';
-import TradeInput from '@/components/common/TradeInput';
-import NetworkTokenSelector from '@/components/common/NetworkTokenSelector';
+import { TradeInput, NetworkTokenSelector, Button } from '@/components';
 import { useState } from 'react';
 import { TokenInfo } from '@/types';
 import { parseUnits } from 'viem';
 import { useContractCall } from '@/hooks/useContractCall';
 import { toast } from 'sonner';
 import { ArrowUpDown } from 'lucide-react';
+import {
+  approveToken,
+  getFee,
+  swap,
+  swapSim,
+  getAllowance
+} from '@/lib/uniswap-helper';
+import { UNISWAP_V3_CONTRACTS } from '@/config/uniswap';
+import { Token } from '@uniswap/sdk-core';
 
 const Swap: NextPage = () => {
-  const { account } = useProtocol();
+  const { account, publicClient, walletClient } = useProtocol();
   const tokens = useTokens();
 
-  const [amountFrom, setAmountFrom] = useState<string>('');
+  const [amountFrom, setAmountFrom] = useState<string>('1');
 
-  const [selectedTokenFrom, setSelectedTokenFrom] = useState<TokenInfo>(tokens[0]);
-  const [selectedTokenTo, setSelectedTokenTo] = useState<TokenInfo>(tokens[1]);
+  const [selectedTokenFrom, setSelectedTokenFrom] = useState<TokenInfo>(tokens[1]);
+  const [selectedTokenTo, setSelectedTokenTo] = useState<TokenInfo>(tokens[2]);
 
   const buttonLabel = () => {
     if (isPending) return 'Processing...';
@@ -51,7 +57,6 @@ const Swap: NextPage = () => {
     return false;
   }
   
-  // const { data: hash, error, isPending, writeContract } = useWriteContract();
   const { isPending, writeContract } = useContractCall();
 
   const isWrap = selectedTokenFrom.isNative && selectedTokenTo.isWrapped;
@@ -63,15 +68,33 @@ const Swap: NextPage = () => {
     if (!account) return toast.error('Please connect your wallet');
     if (isWrap) {
       handleWrap();
-    }
-    if (isUnwrap) {
+    } else if (isUnwrap) {
       handleUnwrap();
+    } else {
+      handleSwap();
     }
     try {
       
     } catch (error) {
       console.error(error);
     }
+  }
+
+  const handleSwap = async () => {
+    const fee = await getFee(publicClient, selectedTokenFrom, selectedTokenTo);
+    if (!fee) return toast.error('No pool found');
+    if (!account) return toast.error('Please connect your wallet');
+    await approveToken(walletClient, selectedTokenFrom, UNISWAP_V3_CONTRACTS.swapRouter02 as `0x${string}`, parseUnits((Number(amountFrom) * 2).toString(), selectedTokenFrom.decimals));
+    const allowance = await getAllowance(publicClient, selectedTokenFrom, account, UNISWAP_V3_CONTRACTS.swapRouter02 as `0x${string}`);
+    console.log(allowance);
+    const res = await swap(walletClient, selectedTokenFrom, selectedTokenTo, parseUnits(amountFrom, selectedTokenFrom.decimals), fee, account);
+    console.log(res);
+    
+    // writeContract({
+    //   address: UNISWAP_V3_CONTRACTS.swapRouter02,
+    //   abi: UNISWAP_V3_CONTRACTS.swapRouter02.abi,
+    //   functionName: 'exactInput',
+    // });
   }
 
   const handleWrap = async () => {
