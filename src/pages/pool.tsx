@@ -1,70 +1,129 @@
 import type { NextPage } from 'next';
 import { Card } from '@radix-ui/themes';
 import { useProtocol, useTokens } from '@/hooks';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TokenInfo } from '@/types';
 import { Plus } from 'lucide-react';
-import { NetworkTokenSelector, FieldItem, CheckSelector, Button } from '@/components';
-import { FEE_TIERS } from '@/config';
-import { parseUnits } from 'viem';
-import { Token } from '@uniswap/sdk-core';
-import { getPoolAddress, createPool, approveToken, initializePool, isPoolInitialized, getPoolTick, mint } from '@/lib/uniswap-helper';
-import { zeroAddress } from 'viem';
+import { NetworkTokenSelector, FieldItem, CheckSelector, Button, Input } from '@/components';
+import { FEE_TIERS, TICK_STRATEGY } from '@/config';
+import { parseUnits, formatUnits } from 'viem';
+import { getAllowance, approveToken } from '@/lib/token-helper';
+import {
+  createPoolIfNecessary,
+  getPoolAddress,
+  calculatePairedTokenAmount,
+  mintPosition,
+  getAmountsMin
+} from '@/lib/pool-helper';
 import { UNISWAP_V3_CONTRACTS } from '@/config';
+import { usePoolInfo } from '@/hooks/usePoolInfo';
 
 const Pool: NextPage = () => {
   const { account, publicClient, walletClient } = useProtocol();
   const tokens = useTokens();
-  const [tokenA, setTokenA] = useState<TokenInfo>(tokens[0]);
-  const [tokenB, setTokenB] = useState<TokenInfo>(tokens[2]);
+  const poolTokens = tokens.filter(token => !token.isNative);
+  const [tokenA, setTokenA] = useState<TokenInfo>(poolTokens[0]);
+  const [tokenB, setTokenB] = useState<TokenInfo>(poolTokens[1]);
+  const [amountA, setAmountA] = useState<string>('100');
+  const [amountB, setAmountB] = useState<string>('100'  );
+  const [tickRange, setTickRange] = useState(TICK_STRATEGY[1].value);
+
   const [feeTier, setFeeTier] = useState(FEE_TIERS[1].value);
+
+  const {
+    poolAddress,
+    priceRatio,
+    sqrtPriceX96,
+    currentTick,
+    tickLower,
+    tickUpper,
+    tickSpacing,
+    isLoading
+  } = usePoolInfo(tokenA, tokenB, feeTier);
+
+  const onAmountChange = (e: React.ChangeEvent<HTMLInputElement>, token: 'A' | 'B') => {
+    const value = e.target.value;
+    const [token0, token1] = tokenA.address.toLowerCase() < tokenB.address.toLowerCase() ? [tokenA, tokenB] : [tokenB, tokenA];
+    if (token === 'A') {
+      setAmountA(value);
+      const currentToken = token0.address.toLowerCase() === tokenA.address.toLowerCase() ? 'token0' : 'token1';
+      const amountB = calculatePairedTokenAmount({
+        token0,
+        token1,
+        fee: feeTier,
+        sqrtPriceX96,
+        tick: currentTick,
+        tickLower,
+        tickUpper,
+        knownToken: currentToken,
+        knownAmountRaw: parseUnits(value, tokenA.decimals)
+      })
+      // const amountB = Number(value) * priceRatio;
+      setAmountB(formatUnits(BigInt(amountB), tokenB.decimals));
+    } else {
+      setAmountB(value);
+      const currentToken = token0.address.toLowerCase() === tokenA.address.toLowerCase() ? 'token1' : 'token0';
+      const amountA = calculatePairedTokenAmount({
+        token0,
+        token1,
+        fee: feeTier,
+        sqrtPriceX96,
+        tick: currentTick,
+        tickLower,
+        tickUpper,
+        knownToken: currentToken,
+        knownAmountRaw: parseUnits(value, tokenB.decimals)
+      })
+      // const amountB = Number(value) * priceRatio;
+      setAmountA(formatUnits(BigInt(amountA), tokenA.decimals));
+    }
+  }
   
   const handleButtonClick = async () => {
-    console.log(tokenA, tokenB, feeTier);
     const [token0, token1] = tokenA.address.toLowerCase() < tokenB.address.toLowerCase() ? [tokenA, tokenB] : [tokenB, tokenA];
+    const [amount0, amount1] = token0.address.toLowerCase() === tokenA.address.toLowerCase() ? [amountA, amountB] : [amountB, amountA];
+    const AMOUNT_0 = parseUnits(amount0, token0.decimals);
+    const AMOUNT_1 = parseUnits(amount1, token1.decimals);
 
-    const tickSpacing: number = FEE_TIERS.find((tier) => tier.value === feeTier)?.tickSpacing as number;
-    const INITIAL_PRICE = 1;
-    const AMOUNT_A = parseUnits('100', token0.decimals);
-    const AMOUNT_B = parseUnits('100', token1.decimals);
-    const SLIPPAGE = 0.5;
+    let poolAddress = await getPoolAddress(publicClient, token0, token1, feeTier);
 
-    const poolAddress = await getPoolAddress(publicClient, token0, token1, feeTier);
-
-    if (poolAddress === zeroAddress) {
-      console.log('Creating pool');
-      const tx = await createPool(walletClient, token0, token1, feeTier);
+    if (!poolAddress) {
+      poolAddress = await createPoolIfNecessary(walletClient, token0, token1, feeTier, 1);
+      return
     }
 
-    console.log('poolAddress', poolAddress);
 
-    await approveToken(walletClient, token0, UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`, AMOUNT_A);
-    await approveToken(walletClient, token1, UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`, AMOUNT_B);
-
-    const isInitialized = await isPoolInitialized(publicClient, poolAddress as `0x${string}`);
-    if (!isInitialized) {
-      console.log('Initializing pool');
-      await initializePool(walletClient, poolAddress as `0x${string}`, token0, token1);
+    const allowance0 = await getAllowance(publicClient, token0, account as `0x${string}`, UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`);
+    if (allowance0 < AMOUNT_0) {
+      await approveToken(walletClient, token0, UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`, AMOUNT_0);
+    }
+    const allowance1 = await getAllowance(publicClient, token1, account as `0x${string}`, UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`);
+    if (allowance1 < AMOUNT_1) {
+      await approveToken(walletClient, token1, UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`, AMOUNT_1);
     }
 
-    const tick = await getPoolTick(publicClient, poolAddress as `0x${string}`);
-    console.log('tick', tick);
-    const tickLower = Math.floor((tick - 600) / tickSpacing) * tickSpacing;
-    const tickUpper = Math.floor((tick + 600) / tickSpacing) * tickSpacing;
-
-    const tx = await mint(walletClient, token0, token1, feeTier, tickLower, tickUpper, AMOUNT_A, AMOUNT_B, account as `0x${string}`);
-    console.log(tx);
-
-    
-
-    // const amount0 = await getAmount0(publicClient, poolAddress as `0x${string}`, tickLower, tickUpper);
-    // const amount1 = await getAmount1(publicClient, poolAddress as `0x${string}`, tickLower, tickUpper);
+    const slippage = 0.05;
+    const { amount0Min, amount1Min } = getAmountsMin({
+      amount0: AMOUNT_0,
+      amount1: AMOUNT_1,
+      slippage,
+    });
 
 
 
-    
-
-    
+    const tx = await mintPosition(walletClient, {
+      token0: token0,
+      token1: token1,
+      fee: feeTier,
+      tickLower,
+      tickUpper,
+      amount0Desired: AMOUNT_0,
+      amount1Desired: AMOUNT_1,
+      amount0Min,
+      amount1Min,
+      recipient: account as `0x${string}`,
+      deadline: BigInt(Math.floor(Date.now() / 1000) + 1000 * 60 * 5),
+    })
 
   }
 
@@ -75,24 +134,33 @@ const Pool: NextPage = () => {
         <div className='flex flex-col gap-4'>
           <FieldItem label='1. Select Token'>
             <div className='flex items-center gap-4'>
-              <NetworkTokenSelector className='flex-1' tokens={tokens} selectedToken={tokenA} onSelect={setTokenA} />
+              <NetworkTokenSelector className='flex-1' tokens={poolTokens} selectedToken={tokenA} onSelect={setTokenA} />
               <Plus />
-              <NetworkTokenSelector className='flex-1' tokens={tokens} selectedToken={tokenB} onSelect={setTokenB} />
+              <NetworkTokenSelector className='flex-1' tokens={poolTokens} selectedToken={tokenB} onSelect={setTokenB} />
             </div>
           </FieldItem>
           <FieldItem label='2. Select Fee Tier'>
             <CheckSelector options={FEE_TIERS} value={feeTier} onChange={setFeeTier} />
           </FieldItem>
+          <FieldItem label='3. Select Tick Range'>
+            <CheckSelector options={TICK_STRATEGY} value={tickRange} onChange={setTickRange} />
+          </FieldItem>
+          <FieldItem label='3. Select Amount'>
+            <div className='flex items-center gap-4'>
+              <Input className='flex-1' value={amountA} onChange={(e) => onAmountChange(e, 'A')} />
+              <Plus />
+              <Input className='flex-1' value={amountB} onChange={(e) => onAmountChange(e, 'B')} />
+            </div>
+            <p className='text-[12px] text-[#d1d1d1]'>{`1 ${tokenA.symbol} = ${priceRatio} ${tokenB.symbol}`}</p>
+          </FieldItem>
           <Button
             className='w-full cursor-pointer bg-gradient-to-r from-sky-500 via-blue-600 to-cyan-500 text-white font-bold text-[16px] rounded-lg'
             onClick={handleButtonClick}
+            disabled={isLoading}
           >
-            Add Liquidity
+            {isLoading ? 'Loading...' : 'Add Liquidity'}
           </Button>
         </div>
-        {/* <Skeleton className='h-[300px] flex items-center justify-center'>
-          <Loading />
-        </Skeleton> */}
       </Card>
     </div>
   );

@@ -82,6 +82,7 @@ const Swap: NextPage = () => {
 
   const handleSwap = async () => {
     const fee = await getFee(publicClient, selectedTokenFrom, selectedTokenTo);
+    console.log(fee);
     if (!fee) return toast.error('No pool found');
     if (!account) return toast.error('Please connect your wallet');
     await approveToken(walletClient, selectedTokenFrom, UNISWAP_V3_CONTRACTS.swapRouter02 as `0x${string}`, parseUnits((Number(amountFrom) * 2).toString(), selectedTokenFrom.decimals));

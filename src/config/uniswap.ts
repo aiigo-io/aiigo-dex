@@ -22,12 +22,6 @@ export enum FeeAmount {
 
 export const FEE_TIERS = [
   {
-    label: 'Lowest',
-    value: FeeAmount.LOWEST,
-    tag: '0.01%',
-    tickSpacing: 1,
-  },
-  {
     label: 'Low',
     value: FeeAmount.LOW,
     tag: '0.05%',
@@ -45,4 +39,19 @@ export const FEE_TIERS = [
     tag: '1.00%',
     tickSpacing: 200,
   },
+]
+
+export const TICK_STRATEGY = [
+  {
+    label: 'Safe',
+    value: 60,
+  },
+  {
+    label: 'Common',
+    value: 15,
+  },
+  {
+    label: 'Expert',
+    value: 5,
+  }
 ]
