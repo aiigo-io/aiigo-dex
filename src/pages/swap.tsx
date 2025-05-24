@@ -10,14 +10,11 @@ import { useContractCall } from '@/hooks/useContractCall';
 import { toast } from 'sonner';
 import { ArrowUpDown } from 'lucide-react';
 import {
-  approveToken,
   getFee,
   swap,
-  swapSim,
-  getAllowance
-} from '@/lib/uniswap-helper';
+} from '@/lib/swap-helper';
+import { getAllowance, approveToken } from '@/lib/token-helper';
 import { UNISWAP_V3_CONTRACTS } from '@/config/uniswap';
-import { Token } from '@uniswap/sdk-core';
 
 const Swap: NextPage = () => {
   const { account, publicClient, walletClient } = useProtocol();
@@ -81,21 +78,24 @@ const Swap: NextPage = () => {
   }
 
   const handleSwap = async () => {
+    const slippage = 0.05;
     const fee = await getFee(publicClient, selectedTokenFrom, selectedTokenTo);
-    console.log(fee);
     if (!fee) return toast.error('No pool found');
     if (!account) return toast.error('Please connect your wallet');
-    await approveToken(walletClient, selectedTokenFrom, UNISWAP_V3_CONTRACTS.swapRouter02 as `0x${string}`, parseUnits((Number(amountFrom) * 2).toString(), selectedTokenFrom.decimals));
-    const allowance = await getAllowance(publicClient, selectedTokenFrom, account, UNISWAP_V3_CONTRACTS.swapRouter02 as `0x${string}`);
-    console.log(allowance);
-    const res = await swap(walletClient, selectedTokenFrom, selectedTokenTo, parseUnits(amountFrom, selectedTokenFrom.decimals), fee, account);
-    console.log(res);
-    
-    // writeContract({
-    //   address: UNISWAP_V3_CONTRACTS.swapRouter02,
-    //   abi: UNISWAP_V3_CONTRACTS.swapRouter02.abi,
-    //   functionName: 'exactInput',
-    // });
+
+    try {
+      const allowance = await getAllowance(publicClient, selectedTokenFrom, account, UNISWAP_V3_CONTRACTS.swapRouter02 as `0x${string}`);
+      if (allowance < parseUnits(amountFrom, selectedTokenFrom.decimals)) {
+        await approveToken(walletClient, selectedTokenFrom, UNISWAP_V3_CONTRACTS.swapRouter02 as `0x${string}`, parseUnits((Number(amountFrom) * 2).toString(), selectedTokenFrom.decimals));
+      }
+
+      const amountIn = parseUnits(amountFrom, selectedTokenFrom.decimals);
+      await swap(publicClient, walletClient, selectedTokenFrom, selectedTokenTo, amountIn, fee, account, slippage);
+      toast.success('Swap successful!');
+    } catch (error: any) {
+      console.error('Swap error:', error);
+      toast.error(error.message || 'Swap failed');
+    }
   }
 
   const handleWrap = async () => {
