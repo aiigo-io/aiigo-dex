@@ -34,7 +34,7 @@ function App({ Component, pageProps }: AppProps) {
             <Theme appearance="dark">
               <Layout>
                 <Component {...pageProps} />
-                <Toaster position='top-right' />
+                <Toaster position='top-right'/>
               </Layout>
             </Theme>
           </RainbowKitProvider>

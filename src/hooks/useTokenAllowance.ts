@@ -1,0 +1,25 @@
+import { formatUnits } from "viem";
+import { useProtocol } from "./useProtocol";
+import { getAllowance } from "@/lib/token-helper";
+import { TokenInfo } from "@/types";
+import useSWR from "swr";
+
+export function useTokenAllowances (token: TokenInfo, spender: `0x${string}`) {
+  const { account, publicClient } = useProtocol();
+  const isReady = token && account;
+  const { data: tokenAllowance, isLoading, mutate } = useSWR(
+    isReady ? ['token-balances', account, token.address] : null,
+    {
+      fetcher: async () => {
+        return await getAllowance(publicClient, token, account as `0x${string}`, spender);
+        
+      },
+      refreshInterval: 1000 * 60 * 5,
+    } 
+  );
+  return {
+    data: tokenAllowance,
+    isLoading,
+    refetch: mutate
+  };
+}

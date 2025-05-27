@@ -95,11 +95,11 @@ const Pool: NextPage = () => {
 
     const allowance0 = await getAllowance(publicClient, token0, account as `0x${string}`, UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`);
     if (allowance0 < AMOUNT_0) {
-      await approveToken(walletClient, token0, UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`, AMOUNT_0);
+      await approveToken(publicClient, walletClient, token0, UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`, AMOUNT_0);
     }
     const allowance1 = await getAllowance(publicClient, token1, account as `0x${string}`, UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`);
     if (allowance1 < AMOUNT_1) {
-      await approveToken(walletClient, token1, UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`, AMOUNT_1);
+      await approveToken(publicClient, walletClient, token1, UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`, AMOUNT_1);
     }
 
     const slippage = 0.05;
