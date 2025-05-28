@@ -4,12 +4,12 @@ import useSWR from 'swr';
 import { TokenInfo } from '@/types';
 
 export function useSwapQuote(tokenIn: TokenInfo, tokenOut: TokenInfo, amountIn: bigint) {
-  const { publicClient } = useProtocol();
+  const { chainId, publicClient } = useProtocol();
 
   const isReady = tokenIn && tokenOut && amountIn;
 
   const { data, isLoading, error } = useSWR(
-    isReady ? ['swap-quote', tokenIn, tokenOut, amountIn] : null,
+    isReady ? ['swap-quote', tokenIn, tokenOut, amountIn, chainId] : null,
     {
       fetcher: async () => {
         if (tokenIn.isNative || tokenOut.isNative) {

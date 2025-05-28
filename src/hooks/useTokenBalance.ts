@@ -5,10 +5,10 @@ import { TokenInfo } from "@/types";
 import useSWR from "swr";
 
 export function useTokenBalances (tokens: TokenInfo[]) {
-  const { account, publicClient } = useProtocol();
+  const { chainId, account, publicClient } = useProtocol();
   const isReady = tokens.length && account;
   const { data: tokenWithBalances, isLoading, mutate } = useSWR(
-    isReady ? ['token-balances', account, tokens.map((t) => t.address)] : null,
+    isReady ? ['token-balances', chainId, account, tokens.map((t) => t.address)] : null,
     {
       fetcher: async () => {
         const balances = await Promise.all(tokens.map((token) => {

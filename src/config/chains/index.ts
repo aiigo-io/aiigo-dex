@@ -1,5 +1,6 @@
 import { AIIGO_CHAIN } from './aiigo';
 
+
 export const CHAIN_IDS = {
   AIIGO: 38_888,
 }

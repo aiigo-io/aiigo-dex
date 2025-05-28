@@ -13,6 +13,8 @@ import { config } from '@/config/wagmi';
 import { Layout } from '@/components/layout/Layout';
 
 import { Toaster } from '@/components/ui/sonner';
+import { DEFAULT_CHAIN_ID, AIIGO } from '@/config/chains';
+import { defineChain } from 'viem';
 
 const client = new QueryClient();
 
@@ -30,7 +32,7 @@ function App({ Component, pageProps }: AppProps) {
       </Head>
       <WagmiProvider config={config}>
         <QueryClientProvider client={client}>
-          <RainbowKitProvider theme={darkTheme()}>
+          <RainbowKitProvider theme={darkTheme()} initialChain={DEFAULT_CHAIN_ID}>
             <Theme appearance="dark">
               <Layout>
                 <Component {...pageProps} />

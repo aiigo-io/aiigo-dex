@@ -5,3 +5,5 @@ export const CHAIN_IDS = {
 }
 
 export const EXPLORER_URL = 'http://explorer.aiigo.org/';
+
+export const MAX_UINT128 = 2n ** 128n - 1n;

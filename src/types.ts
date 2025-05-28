@@ -34,6 +34,7 @@ export interface ContractInfo {
   args?: any[];
   contractName?: string;
   value?: bigint;
+  account?: string;
 }
 
 export interface SendTxData {

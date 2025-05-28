@@ -54,3 +54,7 @@ export const TICK_STRATEGY = [
     value: 5,
   }
 ]
+
+export const GetFeeTier = (fee: number) => {
+  return FEE_TIERS.find((tier) => tier.value === fee)?.tag;
+}

@@ -4,3 +4,6 @@ export * from './useTokenBalance';
 export * from './useTokenAllowance';
 export * from './usePoolInfo';
 export * from './useSwapQuote';
+export * from './useUserPositions';
+export * from './usePositionInfo';
+export * from './useUnclaimedFee';

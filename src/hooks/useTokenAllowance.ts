@@ -5,10 +5,10 @@ import { TokenInfo } from "@/types";
 import useSWR from "swr";
 
 export function useTokenAllowances (token: TokenInfo, spender: `0x${string}`) {
-  const { account, publicClient } = useProtocol();
+  const { chainId, account, publicClient } = useProtocol();
   const isReady = token && account;
   const { data: tokenAllowance, isLoading, mutate } = useSWR(
-    isReady ? ['token-balances', account, token.address] : null,
+    isReady ? ['token-balances', account, token.address, chainId] : null,
     {
       fetcher: async () => {
         return await getAllowance(publicClient, token, account as `0x${string}`, spender);

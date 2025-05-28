@@ -1,3 +1,4 @@
+'use client'
 import type { NextPage } from 'next';
 import { Card } from '@radix-ui/themes';
 import { useProtocol, useTokens } from '@/hooks';
@@ -45,7 +46,7 @@ const Swap: NextPage = () => {
     if (isPending) return 'Processing...';
     if (isAllowanceLoading) return 'Checking allowance...';
     if (parseUnits(amountFrom, selectedTokenFrom.decimals) > selectedTokenBalance) {
-      return `Insufficient ${selectedTokenFrom.symbol} balance`
+      return `Insufficient ${selectedTokenFrom.symbol} balance`;
     }
     if (needApprove) return `Approve ${selectedTokenFrom.symbol}`;
     if (selectedTokenFrom.address === selectedTokenTo.address) {

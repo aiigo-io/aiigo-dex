@@ -6,8 +6,10 @@ import JSBI from 'jsbi'
 import NftPositionManagerABI from "@/config/abi/NftPositionManager.json"
 import { TokenInfo } from "@/types"
 import { FEE_TIERS } from "@/config"
-import { zeroAddress } from "viem"
+import { MAX_UINT128 } from "@/config/constants"
+import { zeroAddress, encodeFunctionData } from "viem"
 import UniswapV3PoolABI from "@/config/abi/Pool.json"
+import { callContract } from "./callContract"
 
 
 export interface MintParams {
@@ -188,5 +190,117 @@ export function getAmountsMin({
   return {
     amount0Min,
     amount1Min,
+  }
+}
+
+export async function getPositions(publicClient: any, account: string) {
+  const positionCount = await publicClient.readContract({
+    address: UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`,
+    abi: NftPositionManagerABI,
+    functionName: 'balanceOf',
+    args: [account]
+  })
+
+  const nftIds = await Promise.all(Array.from({ length: Number(positionCount) }).map(async (_, i) => {
+    return publicClient.readContract({
+      address: UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`,
+      abi: NftPositionManagerABI,
+      functionName: 'tokenOfOwnerByIndex',
+      args: [account, BigInt(i)]
+    })
+  }))
+
+  const positions = await Promise.all(nftIds.map(async (nftId: bigint) => {
+    return publicClient.readContract({
+      address: UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`,
+      abi: NftPositionManagerABI,
+      functionName: 'positions',
+      args: [nftId]
+    })
+  }))
+
+  return positions.map((position: any, idx: number) => {
+    return {
+      nftId: nftIds[idx],
+      token0: position[2],
+      token1: position[3],
+      fee: position[4],
+      tickLower: position[5],
+      tickUpper: position[6],
+      liquidity: position[7],
+      token0FeeGrowth: position[8],
+      token1FeeGrowth: position[9],
+      tokensOwed0: position[10],
+      tokensOwed1: position[11],
+    }
+  });
+}
+
+export async function claimV3Fee(publicClient: any, walletClient: any, tokenId: bigint, account: string) {
+  return await callContract(
+    publicClient,
+    walletClient,
+    {
+      address: UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`,
+      abi: NftPositionManagerABI,
+      functionName: 'collect',
+      args: [{ tokenId, recipient: account, amount0Max: MAX_UINT128, amount1Max: MAX_UINT128 }]
+    }
+  )
+}
+
+export async function withdrawPosition(publicClient: any, walletClient: any, tokenId: bigint, account: string, autoBurn = false) {
+  const position = await publicClient.readContract({
+    address: UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`,
+    abi: NftPositionManagerABI,
+    functionName: 'positions',
+    args: [tokenId],
+  });
+  const liquidity: bigint = position[7];
+  console.log(liquidity);
+  if (liquidity > 0n) {
+    await callContract(
+      publicClient,
+      walletClient,
+      {
+        address: UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`,
+        abi: NftPositionManagerABI,
+        functionName: 'decreaseLiquidity',
+        args: [{
+          tokenId,
+          liquidity,
+          amount0Min: 0n,
+          amount1Min: 0n,
+          deadline: BigInt(Math.floor(Date.now() / 1000) + 60),
+        }],
+      }
+    );
+  }
+  await callContract(
+    publicClient,
+    walletClient,
+    {
+      address: UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`,
+      abi: NftPositionManagerABI,
+      functionName: 'collect',
+      args: [{
+        tokenId,
+        recipient: account,
+        amount0Max: MAX_UINT128,
+        amount1Max: MAX_UINT128,
+      }],
+    }
+  );
+  if (autoBurn) {
+    await callContract(
+      publicClient,
+      walletClient,
+      {
+        address: UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`,
+        abi: NftPositionManagerABI,
+        functionName: 'burn',
+        args: [tokenId],
+      }
+    );
   }
 }

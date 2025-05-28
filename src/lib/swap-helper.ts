@@ -32,8 +32,7 @@ export async function fetchSwapQuote(
     address: UNISWAP_V3_CONTRACTS.quoterV2Address,
     abi: QuoterV2ABI,
     functionName: 'quoteExactInputSingle',
-    args: [
-      {
+    args: [{
       tokenIn: tokenIn.address as `0x${string}`,
       tokenOut: tokenOut.address as `0x${string}`,
       fee: fee,
