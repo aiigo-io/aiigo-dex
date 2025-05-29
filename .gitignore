@@ -11,6 +11,7 @@
 # next.js
 /.next/
 /out/
+/cache/
 
 # production
 /build
@@ -36,3 +37,7 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# Next.js build cache
+.next/cache/
+cache/
