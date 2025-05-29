@@ -6,11 +6,13 @@ import { useAccount, useWalletClient, usePublicClient, useChainId, useSwitchChai
 export function useProtocol() {
   const chainId = useChainId();
   const { chains, switchChain } = useSwitchChain()
-  const { address: account } = useAccount();
+  const { address: account, chain } = useAccount();
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
 
   return {
+    isConnected: !!account,
+    unSupportedChain: !chain,
     account,
     chainId,
     chains, switchChain,

@@ -46,7 +46,8 @@ export async function fetchSwapQuote(
   }
 }
 
-export async function swap(publicClient: any, walletClient: any, tokenIn: TokenInfo, tokenOut: TokenInfo, amountIn: bigint, fee: number, account: `0x${string}`, slippage = 0.05) {
+export async function swap(publicClient: any, walletClient: any, tokenIn: TokenInfo, tokenOut: TokenInfo, amountIn: bigint, fee: number, account: `0x${string}`, slippage = 0.05, fromNative = false) {
+  console.log('------', tokenIn.symbol, tokenOut.symbol)
   const poolAddress = await getPoolAddress(publicClient, tokenIn, tokenOut, fee);
   if (!poolAddress) throw new Error('Pool not found');
 
@@ -62,7 +63,8 @@ export async function swap(publicClient: any, walletClient: any, tokenIn: TokenI
       amountIn: amountIn,
       amountOutMinimum: 0n,
       sqrtPriceLimitX96: 0n,
-    }]
+    }],
+    value: fromNative ? amountIn : undefined
   })
 }
 

@@ -7,3 +7,4 @@ export * from './useSwapQuote';
 export * from './useUserPositions';
 export * from './usePositionInfo';
 export * from './useUnclaimedFee';
+export * from './useSwapPoolExist';

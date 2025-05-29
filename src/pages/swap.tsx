@@ -15,7 +15,7 @@ import {
   unwrap,
   swap,
 } from '@/lib/swap-helper';
-import { useTokenBalances, useTokenAllowances, useSwapQuote } from '@/hooks';
+import { useTokenBalances, useTokenAllowances, useSwapQuote, useSwapPoolExist } from '@/hooks';
 import { getAllowance, approveToken } from '@/lib/token-helper';
 import { UNISWAP_V3_CONTRACTS } from '@/config/uniswap';
 
@@ -27,8 +27,14 @@ const Swap: NextPage = () => {
   const [amountFrom, setAmountFrom] = useState<string>('1');
   const { data: tokens, isLoading: isBalanceLoading, refetch: refetchBalance } = useTokenBalances(_tokens);
 
-  const [selectedTokenFrom, setSelectedTokenFrom] = useState<TokenInfo>(tokens[1]);
-  const [selectedTokenTo, setSelectedTokenTo] = useState<TokenInfo>(tokens[2]);
+  const wrappedTokens = tokens.find((t: TokenInfo) => t.isWrapped);
+
+  const [selectedTokenFrom, setSelectedTokenFrom] = useState<TokenInfo>(tokens[0]);
+  const [selectedTokenTo, setSelectedTokenTo] = useState<TokenInfo>(tokens[1]);
+
+  const { data: swapPoolExist, isLoading: isSwapPoolExistLoading } = useSwapPoolExist(selectedTokenFrom, selectedTokenTo);
+
+  console.log('swapPoolExist', swapPoolExist);
 
   const selectedTokenBalance = tokens.find((t: TokenInfo) => t.address === selectedTokenFrom.address && t.chainId === selectedTokenFrom.chainId)?.balance || 0n;
   const selectedTokenBalanceFormatted = tokens.find((t: TokenInfo) => t.address === selectedTokenFrom.address && t.chainId === selectedTokenFrom.chainId)?.balanceFormatted || '-';
@@ -68,6 +74,7 @@ const Swap: NextPage = () => {
   }
 
   const buttonDisabled = () => {
+    if (!swapPoolExist) return true;
     if (isPending || isAllowanceLoading) return true;
     if (!selectedTokenFrom || !selectedTokenTo) return true;
     if (selectedTokenFrom.address === selectedTokenTo.address) return true;
@@ -103,14 +110,16 @@ const Swap: NextPage = () => {
 
   const handleSwap = async () => {
     const slippage = 0.05;
-    const fee = await getFee(publicClient, selectedTokenFrom, selectedTokenTo);
-    console.log(fee);
+    const isFromNative = selectedTokenFrom.isNative;
+    const _selectedTokenFrom = isFromNative ? wrappedTokens : selectedTokenFrom;
+    const fee = await getFee(publicClient, _selectedTokenFrom, selectedTokenTo);
     if (!fee) return toast.error('No pool found');
     if (!account) return toast.error('Please connect your wallet');
     try {
       const amountIn = parseUnits(amountFrom, selectedTokenFrom.decimals);
       setIsPending(true);
-      await swap(publicClient, walletClient, selectedTokenFrom, selectedTokenTo, amountIn, fee, account, slippage);
+      
+      await swap(publicClient, walletClient, _selectedTokenFrom, selectedTokenTo, amountIn, fee, account, slippage, isFromNative);
       setIsPending(false);
     } catch (error: any) {
       console.log(error)

@@ -1,4 +1,5 @@
 import { ConnectButton as RainbowConnectButton } from '@rainbow-me/rainbowkit';
+import { Button } from '@/components';
 export const ConnectWallet = () => {
   return (
     <RainbowConnectButton.Custom>
@@ -30,14 +31,13 @@ export const ConnectWallet = () => {
                 userSelect: 'none',
               },
             })}
-            className="border border-white rounded-full px-4 py-2"
           >
             {(() => {
               if (!connected) {
                 return (
-                  <button onClick={openConnectModal} type="button">
+                  <Button onClick={openConnectModal} type="button" variant="primary">
                     Connect Wallet
-                  </button>
+                  </Button>
                 );
               }
               if (chain.unsupported) {

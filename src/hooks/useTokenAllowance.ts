@@ -12,9 +12,9 @@ export function useTokenAllowances (token: TokenInfo, spender: `0x${string}`) {
     {
       fetcher: async () => {
         return await getAllowance(publicClient, token, account as `0x${string}`, spender);
-        
       },
-      refreshInterval: 1000 * 60 * 5,
+      refreshInterval: 5 * 60 * 1000,
+      revalidateOnFocus: false,
     } 
   );
   return {
