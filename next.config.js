@@ -1,6 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Configure for static export on Cloudflare Pages
+  output: 'export',
+  trailingSlash: true,
+  images: {
+    unoptimized: true
+  },
   // Disable webpack cache for Cloudflare Pages deployment
   webpack: (config, { dev, isServer }) => {
     config.externals.push('pino-pretty', 'lokijs', 'encoding');
