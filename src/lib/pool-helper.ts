@@ -20,10 +20,9 @@ export interface MintParams {
   tickUpper: number
   amount0Desired: bigint
   amount1Desired: bigint
-  amount0Min: bigint
-  amount1Min: bigint
   recipient: `0x${string}`
-  deadline: bigint
+  deadline: bigint,
+  slippage: number
 }
 
 export async function getPoolAddress(publicClient: any, token0: TokenInfo, token1: TokenInfo, fee: number) {
@@ -46,13 +45,13 @@ export async function getPoolTick(publicClient: any, poolAddress: string) {
   return res[1];
 }
 
-export async function createPoolIfNecessary(walletClient: any, token0: TokenInfo, token1: TokenInfo, fee: number, priceRatio = 1) {
+export async function createPoolIfNecessary(publicClient: any, walletClient: any, token0: TokenInfo, token1: TokenInfo, fee: number, priceRatio = 1) {
   const [sorted0, sorted1] = token0.address.toLocaleLowerCase() < token1.address.toLocaleLowerCase() ? [token0, token1] : [token1, token0];
   const sqrtPriceX96 = encodeSqrtRatioX96(
     JSBI.BigInt(priceRatio * 1e6), // numerator
     JSBI.BigInt(1e6) // denominator
   ).toString()
-  return await walletClient.writeContract({
+  return await callContract(publicClient, walletClient, {
     address: UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`,
     abi: NftPositionManagerABI,
     functionName: 'createAndInitializePoolIfNecessary',
@@ -95,25 +94,29 @@ export async function getRecommendedTickRange(publicClient: any, poolAddress: st
 }
 
 export async function mintPosition(
+  publicClient: any,
   walletClient: any,
   params: MintParams
 ) {
-  const [sorted0, sorted1] = params.token0.address.toLocaleLowerCase() < params.token1.address.toLocaleLowerCase() ? [params.token0, params.token1] : [params.token1, params.token0];
-  const isSameOrder = sorted0.address.toLowerCase() === params.token0.address.toLowerCase()
+  const { amount0Min, amount1Min } = getAmountsMin({
+    amount0: params.amount0Desired,
+    amount1: params.amount1Desired,
+    slippage: params.slippage,
+  });
   const args = {
-    token0: sorted0.address as `0x${string}`,
-    token1: sorted1.address as `0x${string}`,
+    token0: params.token0.address as `0x${string}`,
+    token1: params.token1.address as `0x${string}`,
     fee: params.fee,
     tickLower: params.tickLower,
     tickUpper: params.tickUpper,
-    amount0Desired: isSameOrder ? params.amount0Desired : params.amount1Desired,
-    amount1Desired: isSameOrder ? params.amount1Desired : params.amount0Desired,
-    amount0Min: isSameOrder ? params.amount0Min : params.amount1Min,
-    amount1Min: isSameOrder ? params.amount1Min : params.amount0Min,
+    amount0Desired: params.amount0Desired,
+    amount1Desired: params.amount1Desired,
+    amount0Min: 0n,
+    amount1Min: 0n,
     recipient: params.recipient,
     deadline: params.deadline
   }
-  return await walletClient.writeContract({
+  return await callContract(publicClient, walletClient, {
     address: UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`,
     abi: NftPositionManagerABI,
     functionName: 'mint',

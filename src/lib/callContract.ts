@@ -10,7 +10,7 @@ export async function callContract(
 ) {
   try {
     const txHash = await walletClient.writeContract(contractInfo as WriteContractParameters);
-    toast.info('Transaction sent', {
+    const toastId = toast.loading('Transaction sent', {
       duration: 10000,
       style: {
         backgroundColor: '#FFB62E',
@@ -27,6 +27,7 @@ export async function callContract(
     });
     if (transaction && transaction.status != 'success') {
       toast.error('Transaction failed', {
+        id: toastId,
         style: {
           backgroundColor: '#EE3C4D',
           color: '#fff',
@@ -40,6 +41,7 @@ export async function callContract(
       return;
     }
     toast.success('Transaction completed', {
+      id: toastId,
       style: {
         backgroundColor: '#2DCE89',
         color: '#fff',

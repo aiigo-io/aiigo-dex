@@ -167,6 +167,7 @@ const Swap: NextPage = () => {
           </TradeInput>
           <Button
             className='w-full cursor-pointer bg-gradient-to-r from-sky-500 via-blue-600 to-cyan-500 text-white font-bold text-[16px] rounded-lg'
+            size='lg'
             onClick={handleButtonClick}
             disabled={buttonDisabled()}
           >

@@ -6,7 +6,7 @@ import { getPoolAddress, getRecommendedTickRange } from "@/lib/pool-helper";
 export function usePoolInfo(tokenA: TokenInfo, tokenB: TokenInfo, fee: number, tickRange = 15) {
   const { publicClient } = useProtocol();
   const [token0, token1] = tokenA.address.toLowerCase() < tokenB.address.toLowerCase() ? [tokenA, tokenB] : [tokenB, tokenA];
-  const { data: poolAddress, isLoading } = useSWR(
+  const { data: poolAddress, isLoading, mutate: refetchPoolInfo } = useSWR(
     token0 && token1 && fee && publicClient ? [token0, token1, fee, publicClient] : null,
     {
       fetcher: async () => {
@@ -36,6 +36,7 @@ export function usePoolInfo(tokenA: TokenInfo, tokenB: TokenInfo, fee: number, t
     ...(recommendedTickRange || {}),
     poolAddress,
     priceRatio: finalPriceRatio,
-    isLoading: isLoading || isRecommendedTickRangeLoading
+    isLoading: isLoading || isRecommendedTickRangeLoading,
+    refetch: refetchPoolInfo
   };
 }

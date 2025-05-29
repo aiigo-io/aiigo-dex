@@ -1,3 +1,4 @@
+
 export const UNISWAP_V3_CONTRACTS = {
   v3CoreFactoryAddress: '0x2b638a84413459026aA568037a523f90FFdc9726',
   multicall2Address: '0x28DC29A06b4Bad6DDb807b8Cc4a97B9EfF222b20',
@@ -41,6 +42,10 @@ export const FEE_TIERS = [
 ]
 
 export const TICK_STRATEGY = [
+  {
+    label: 'Full',
+    value: 887272,
+  },
   {
     label: 'Safe',
     value: 60,

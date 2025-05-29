@@ -189,7 +189,9 @@
     "type": "event"
   },
   {
-    "inputs": [],
+    "inputs": [
+
+    ],
     "name": "DOMAIN_SEPARATOR",
     "outputs": [
       {
@@ -202,7 +204,9 @@
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+
+    ],
     "name": "PERMIT_TYPEHASH",
     "outputs": [
       {
@@ -215,7 +219,9 @@
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+
+    ],
     "name": "WETH9",
     "outputs": [
       {
@@ -241,7 +247,9 @@
       }
     ],
     "name": "approve",
-    "outputs": [],
+    "outputs": [
+
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -265,7 +273,9 @@
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+
+    ],
     "name": "baseURI",
     "outputs": [
       {
@@ -286,7 +296,9 @@
       }
     ],
     "name": "burn",
-    "outputs": [],
+    "outputs": [
+
+    ],
     "stateMutability": "payable",
     "type": "function"
   },
@@ -422,7 +434,9 @@
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+
+    ],
     "name": "factory",
     "outputs": [
       {
@@ -649,7 +663,9 @@
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+
+    ],
     "name": "name",
     "outputs": [
       {
@@ -714,7 +730,9 @@
       }
     ],
     "name": "permit",
-    "outputs": [],
+    "outputs": [
+
+    ],
     "stateMutability": "payable",
     "type": "function"
   },
@@ -793,9 +811,13 @@
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+
+    ],
     "name": "refundETH",
-    "outputs": [],
+    "outputs": [
+
+    ],
     "stateMutability": "payable",
     "type": "function"
   },
@@ -818,7 +840,9 @@
       }
     ],
     "name": "safeTransferFrom",
-    "outputs": [],
+    "outputs": [
+
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -846,7 +870,9 @@
       }
     ],
     "name": "safeTransferFrom",
-    "outputs": [],
+    "outputs": [
+
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -884,7 +910,9 @@
       }
     ],
     "name": "selfPermit",
-    "outputs": [],
+    "outputs": [
+
+    ],
     "stateMutability": "payable",
     "type": "function"
   },
@@ -922,7 +950,9 @@
       }
     ],
     "name": "selfPermitAllowed",
-    "outputs": [],
+    "outputs": [
+
+    ],
     "stateMutability": "payable",
     "type": "function"
   },
@@ -960,7 +990,9 @@
       }
     ],
     "name": "selfPermitAllowedIfNecessary",
-    "outputs": [],
+    "outputs": [
+
+    ],
     "stateMutability": "payable",
     "type": "function"
   },
@@ -998,7 +1030,9 @@
       }
     ],
     "name": "selfPermitIfNecessary",
-    "outputs": [],
+    "outputs": [
+
+    ],
     "stateMutability": "payable",
     "type": "function"
   },
@@ -1016,7 +1050,9 @@
       }
     ],
     "name": "setApprovalForAll",
-    "outputs": [],
+    "outputs": [
+
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -1058,12 +1094,16 @@
       }
     ],
     "name": "sweepToken",
-    "outputs": [],
+    "outputs": [
+
+    ],
     "stateMutability": "payable",
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+
+    ],
     "name": "symbol",
     "outputs": [
       {
@@ -1138,7 +1178,9 @@
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+
+    ],
     "name": "totalSupply",
     "outputs": [
       {
@@ -1169,7 +1211,9 @@
       }
     ],
     "name": "transferFrom",
-    "outputs": [],
+    "outputs": [
+
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -1192,7 +1236,9 @@
       }
     ],
     "name": "uniswapV3MintCallback",
-    "outputs": [],
+    "outputs": [
+
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -1210,7 +1256,9 @@
       }
     ],
     "name": "unwrapWETH9",
-    "outputs": [],
+    "outputs": [
+
+    ],
     "stateMutability": "payable",
     "type": "function"
   },

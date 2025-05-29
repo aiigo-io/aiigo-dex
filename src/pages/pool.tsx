@@ -4,7 +4,7 @@ import PositionList from '@/features/pool/PositionList';
 
 const Pool: NextPage = () => {
   return (
-    <div className='flex justify-center pt-10 select-none gap-4 w-[1200px] mx-auto'>
+    <div className='flex justify-center py-10 select-none gap-4 w-[1200px] mx-auto overflow-y-auto'>
       <AddLiquidity />
       <PositionList />
     </div>
