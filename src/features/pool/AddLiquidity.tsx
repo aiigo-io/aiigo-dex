@@ -36,8 +36,8 @@ const AddLiquidity: React.FC = () => {
   const tokenABalanceFormatted = poolTokens.find((token: TokenInfo) => token.address === tokenA.address)?.balanceFormatted;
   const tokenBBalanceFormatted = poolTokens.find((token: TokenInfo) => token.address === tokenB.address)?.balanceFormatted;
 
-  const tokenANeedApprove = allowanceA && allowanceA < parseUnits(amountA, tokenA.decimals);
-  const tokenBNeedApprove = allowanceB && allowanceB < parseUnits(amountB, tokenB.decimals);
+  const tokenANeedApprove = allowanceA !== undefined && allowanceA < parseUnits(amountA, tokenA.decimals);
+  const tokenBNeedApprove = allowanceB !== undefined && allowanceB < parseUnits(amountB, tokenB.decimals);
 
   const {
     poolAddress,
@@ -50,8 +50,6 @@ const AddLiquidity: React.FC = () => {
     isLoading: isPoolLoading,
     refetch: refetchPoolInfo,
   } = usePoolInfo(tokenA, tokenB, feeTier);
-
-  console.log(`【${tokenA.symbol}——${tokenB.symbol}——${feeTier}】 ${poolAddress}`)
 
   const onAmountChange = (e: React.ChangeEvent<HTMLInputElement>, token: 'A' | 'B') => {
     const value = e.target.value;
@@ -145,8 +143,8 @@ const AddLiquidity: React.FC = () => {
     if (tokenA.address === tokenB.address) return 'Select Different Token';
     if (!amountA || !amountB) return 'Enter Amount';
     if (!poolAddress) return 'Create Pool';
-    if (allowanceA && allowanceA < parseUnits(amountA, tokenA.decimals)) return 'Approve Token A';
-    if (allowanceB && allowanceB < parseUnits(amountB, tokenB.decimals)) return 'Approve Token B';
+    if (tokenANeedApprove) return `Approve ${tokenA.symbol}`;
+    if (tokenBNeedApprove) return `Approve ${tokenB.symbol}`;
     return 'Add Liquidity';
   }
 

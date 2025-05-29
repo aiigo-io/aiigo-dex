@@ -29,7 +29,9 @@ export function useUserPositions () {
       token0Info: tokenInfoMaps[position.token0.toLowerCase()],
       token1Info: tokenInfoMaps[position.token1.toLowerCase()],
     }
-  })
+  }).sort((a: any, b: any) => {
+    return Number(b.nftId) - Number(a.nftId);
+  });
   return {
     data: positionInfos || [],
     isLoading,
