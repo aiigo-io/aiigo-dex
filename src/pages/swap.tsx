@@ -10,12 +10,11 @@ import { parseUnits, formatUnits } from 'viem';
 import { toast } from 'sonner';
 import { ArrowUpDown } from 'lucide-react';
 import {
-  getFee,
   wrap,
   unwrap,
   swap,
 } from '@/lib/swap-helper';
-import { useTokenBalances, useTokenAllowances, useSwapQuote, useSwapPoolExist } from '@/hooks';
+import { useTokenBalances, useTokenAllowances, useSwapQuote } from '@/hooks';
 import { getAllowance, approveToken } from '@/lib/token-helper';
 import { UNISWAP_V3_CONTRACTS } from '@/config/uniswap';
 
@@ -32,9 +31,10 @@ const Swap: NextPage = () => {
   const [selectedTokenFrom, setSelectedTokenFrom] = useState<TokenInfo>(tokens[0]);
   const [selectedTokenTo, setSelectedTokenTo] = useState<TokenInfo>(tokens[1]);
 
-  const { data: swapPoolExist, isLoading: isSwapPoolExistLoading } = useSwapPoolExist(selectedTokenFrom, selectedTokenTo);
+  const isWrap = selectedTokenFrom.isNative && selectedTokenTo.isWrapped;
+  const isUnwrap = selectedTokenFrom.isWrapped && selectedTokenTo.isNative;
 
-  console.log('swapPoolExist', swapPoolExist);
+  const isFromNative = selectedTokenFrom.isNative;
 
   const selectedTokenBalance = tokens.find((t: TokenInfo) => t.address === selectedTokenFrom.address && t.chainId === selectedTokenFrom.chainId)?.balance || 0n;
   const selectedTokenBalanceFormatted = tokens.find((t: TokenInfo) => t.address === selectedTokenFrom.address && t.chainId === selectedTokenFrom.chainId)?.balanceFormatted || '-';
@@ -43,24 +43,21 @@ const Swap: NextPage = () => {
   const { data: allowance, isLoading: isAllowanceLoading, refetch: refetchAllowance } = useTokenAllowances(selectedTokenFrom, UNISWAP_V3_CONTRACTS.swapRouter02 as `0x${string}`)
   const needApprove = allowance < parseUnits(amountFrom, selectedTokenFrom.decimals);
 
-  const { data: swapQuote, isLoading: isSwapQuoteLoading } = useSwapQuote(selectedTokenFrom, selectedTokenTo, parseUnits(amountFrom, selectedTokenFrom.decimals));
+  const realSelectedTokenFrom = (!isWrap && !isUnwrap && selectedTokenFrom.isNative) ? wrappedTokens : selectedTokenFrom;
+
+  const { data: swapQuote, isLoading: isSwapQuoteLoading } = useSwapQuote(realSelectedTokenFrom, selectedTokenTo, parseUnits(amountFrom, selectedTokenFrom.decimals));
   
-  const isWrap = selectedTokenFrom.isNative && selectedTokenTo.isWrapped;
-  const isUnwrap = selectedTokenFrom.isWrapped && selectedTokenTo.isNative;
+  
 
   const buttonLabel = () => {
+    if (selectedTokenFrom.address === selectedTokenTo.address) return 'Select Different Token';
+    if (amountFrom === '') return 'Enter Amount';
     if (isPending) return 'Processing...';
     if (isAllowanceLoading) return 'Checking allowance...';
     if (parseUnits(amountFrom, selectedTokenFrom.decimals) > selectedTokenBalance) {
       return `Insufficient ${selectedTokenFrom.symbol} balance`;
     }
     if (needApprove) return `Approve ${selectedTokenFrom.symbol}`;
-    if (selectedTokenFrom.address === selectedTokenTo.address) {
-      return 'Select Different Token';
-    }
-    if (amountFrom === '') {
-      return 'Enter Amount';
-    }
     if (isNaN(Number(amountFrom)) || !parseUnits(amountFrom, selectedTokenFrom.decimals)) {
       return 'Enter Valid Amount';
     }
@@ -74,7 +71,7 @@ const Swap: NextPage = () => {
   }
 
   const buttonDisabled = () => {
-    if (!swapPoolExist) return true;
+    if (!swapQuote) return true;
     if (isPending || isAllowanceLoading) return true;
     if (!selectedTokenFrom || !selectedTokenTo) return true;
     if (selectedTokenFrom.address === selectedTokenTo.address) return true;
@@ -110,16 +107,13 @@ const Swap: NextPage = () => {
 
   const handleSwap = async () => {
     const slippage = 0.05;
-    const isFromNative = selectedTokenFrom.isNative;
     const _selectedTokenFrom = isFromNative ? wrappedTokens : selectedTokenFrom;
-    const fee = await getFee(publicClient, _selectedTokenFrom, selectedTokenTo);
-    if (!fee) return toast.error('No pool found');
     if (!account) return toast.error('Please connect your wallet');
     try {
       const amountIn = parseUnits(amountFrom, selectedTokenFrom.decimals);
       setIsPending(true);
       
-      await swap(publicClient, walletClient, _selectedTokenFrom, selectedTokenTo, amountIn, fee, account, slippage, isFromNative);
+      await swap(publicClient, walletClient, _selectedTokenFrom, selectedTokenTo, amountIn, swapQuote.fee, account, slippage, isFromNative);
       setIsPending(false);
     } catch (error: any) {
       console.log(error)

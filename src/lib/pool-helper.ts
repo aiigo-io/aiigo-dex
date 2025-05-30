@@ -260,7 +260,6 @@ export async function withdrawPosition(publicClient: any, walletClient: any, tok
     args: [tokenId],
   });
   const liquidity: bigint = position[7];
-  console.log(liquidity);
   if (liquidity > 0n) {
     await callContract(
       publicClient,

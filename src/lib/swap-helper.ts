@@ -8,6 +8,16 @@ import QuoterV2ABI from "@/config/abi/QuoterV2.json";
 import UniswapRouterABI from "@/config/abi/UniswapRouter.json";
 import { callContract } from "./callContract";
 
+export async function getFees(publicClient: any, token0: TokenInfo, token1: TokenInfo) {
+  let fees = [];
+  for (const tier of FEE_TIERS) {
+    const poolAddress = await getPoolAddress(publicClient, token0, token1, tier.value);
+    if (poolAddress) {
+      fees.push(tier.value)
+    }
+  }
+  return fees;
+}
 
 export async function getFee(publicClient: any, token0: TokenInfo, token1: TokenInfo) {
   let fee = null;
@@ -41,13 +51,13 @@ export async function fetchSwapQuote(
     }]
   })
   return {
+    fee,
     amountOut: result[0],
     gas: result[3]
   }
 }
 
 export async function swap(publicClient: any, walletClient: any, tokenIn: TokenInfo, tokenOut: TokenInfo, amountIn: bigint, fee: number, account: `0x${string}`, slippage = 0.05, fromNative = false) {
-  console.log('------', tokenIn.symbol, tokenOut.symbol)
   const poolAddress = await getPoolAddress(publicClient, tokenIn, tokenOut, fee);
   if (!poolAddress) throw new Error('Pool not found');
 
