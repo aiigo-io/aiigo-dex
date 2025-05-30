@@ -5,8 +5,10 @@ import Image from "next/image";
 import { ConnectWallet } from '@/components';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useProtocol } from "@/hooks/useProtocol";
 export function DexHeader() {
   const pathname = usePathname();
+  const { isConnected } = useProtocol();
   const menus = [
     {
       label: 'Swap',
@@ -43,7 +45,9 @@ export function DexHeader() {
         </div>
       </div>
       
-      <ConnectWallet />
+      {
+        isConnected && <ConnectWallet />
+      }
     </div>
   );
 }

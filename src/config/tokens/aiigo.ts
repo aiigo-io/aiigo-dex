@@ -40,7 +40,7 @@ export const AIIGO_TOKENS: TokenInfo[] = [
     name: 'MNT',
     symbol: 'MNT',
     decimals: 18,
-    logo: '/images/tokens/MNT.png',
+    logo: '/images/tokens/MNT_1.png',
     address: '0xE91be89138b7D2364d097cA73152c91f0E61a96D',
     chainId: CHAIN_IDS.AIIGO,
   }

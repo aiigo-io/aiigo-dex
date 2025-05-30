@@ -11,11 +11,7 @@ interface LayoutProps {
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { isConnected, chains,chainId, switchChain, unSupportedChain } = useProtocol();
-
-  console.log('unSupportedChain', unSupportedChain)
-
-  console.log(chains, chainId)
+  const { isConnected, switchChain, unSupportedChain } = useProtocol();
 
   useEffect(() => {
     const switchToAIIGO = async () => {
