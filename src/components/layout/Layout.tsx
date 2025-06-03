@@ -1,9 +1,8 @@
 'use client'
 import React, { useEffect } from 'react';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { DexHeader, DexFooter } from '@/components';
 import { useProtocol } from '@/hooks';
-import { DEFAULT_CHAIN_ID, AIIGO } from '@/config';
+import { AIIGO } from '@/config';
 import { WrongChain } from '../common/WrongChain';
 
 interface LayoutProps {

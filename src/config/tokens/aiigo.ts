@@ -1,6 +1,9 @@
 import { zeroAddress } from 'viem';
 import { CHAIN_IDS } from '@/config/chains';
 import { TokenInfo } from '@/types';
+
+console.log(CHAIN_IDS)
+
 export const AIIGO_TOKENS: TokenInfo[] = [
   {
     name: 'AIGO',

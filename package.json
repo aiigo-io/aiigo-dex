@@ -12,9 +12,10 @@
     "@radix-ui/react-dialog": "^1.1.13",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/themes": "^3.2.1",
-    "@rainbow-me/rainbowkit": "^2.2.5",
+    "@reown/appkit": "^1.7.7",
+    "@reown/appkit-adapter-wagmi": "^1.7.7",
     "@tailwindcss/postcss": "^4.1.7",
-    "@tanstack/react-query": "^5.55.3",
+    "@tanstack/react-query": "^5.79.0",
     "@uniswap/sdk-core": "^7.7.2",
     "@uniswap/v3-sdk": "^3.25.2",
     "@wagmi/core": "^2.17.2",
@@ -30,8 +31,8 @@
     "sonner": "^2.0.3",
     "swr": "^2.3.3",
     "tailwind-merge": "^3.3.0",
-    "viem": "2.29.2",
-    "wagmi": "^2.15.2"
+    "viem": "^2.29.2",
+    "wagmi": "^2.15.4"
   },
   "devDependencies": {
     "@types/node": "^20.14.8",
