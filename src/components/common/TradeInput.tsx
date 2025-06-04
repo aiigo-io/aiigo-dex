@@ -30,11 +30,11 @@ export const TradeInput: React.FC<TradeInputProps> = ({
 
   return <Card className={className}>
     <p className='mb-2 text-[14px] text-[#888888] font-medium'>{label}</p>
-    <div className='flex items-center justify-between gap-2'>
+    <div className='flex items-center justify-between gap-2 w-full'>
       {
         isLoading ? <Skeleton className='w-full h-[30px]' /> : <input
           placeholder={placeholder}
-          className="flex-1 leading-[30px] focus:outline-none text-[22px] font-medium text-[#d1d1d1] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="w-full flex-1 leading-[30px] focus:outline-none text-[22px] font-medium text-[#d1d1d1] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           value={value}
           onChange={onChange}
           readOnly={readonly}
