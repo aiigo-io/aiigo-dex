@@ -33,6 +33,8 @@ const AddLiquidity: React.FC = () => {
   const { data: allowanceA, isLoading: isAllowanceALoading, refetch: refetchAllowanceA } = useTokenAllowances(tokenA, UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`);
   const { data: allowanceB, isLoading: isAllowanceBLoading, refetch: refetchAllowanceB } = useTokenAllowances(tokenB, UNISWAP_V3_CONTRACTS.nonfungibleTokenPositionManagerAddress as `0x${string}`);
 
+  const tokenABalance = poolTokens.find((token: TokenInfo) => token.address === tokenA.address)?.balance;
+  const tokenBBalance = poolTokens.find((token: TokenInfo) => token.address === tokenB.address)?.balance;
   const tokenABalanceFormatted = poolTokens.find((token: TokenInfo) => token.address === tokenA.address)?.balanceFormatted;
   const tokenBBalanceFormatted = poolTokens.find((token: TokenInfo) => token.address === tokenB.address)?.balanceFormatted;
 
@@ -134,7 +136,13 @@ const AddLiquidity: React.FC = () => {
   const isLoading = isPoolLoading || isAllowanceALoading || isAllowanceBLoading || isBalanceLoading;
 
   const buttonDisabled = () => {
-    return isLoading;
+    if (isLoading) return true;
+    if (!tokenA || !tokenB) return true;
+    if (tokenA.address === tokenB.address) return true;
+    if (!amountA || !amountB) return true;
+    if (parseUnits(amountA, tokenA.decimals) > tokenABalance) return true;
+    if (parseUnits(amountB, tokenB.decimals) > tokenBBalance) return true;
+    return false;
   }
 
   const buttonLabel = () => {
@@ -142,6 +150,13 @@ const AddLiquidity: React.FC = () => {
     if (!tokenA || !tokenB) return 'Select Token';
     if (tokenA.address === tokenB.address) return 'Select Different Token';
     if (!amountA || !amountB) return 'Enter Amount';
+    
+    if (parseUnits(amountA, tokenA.decimals) > tokenABalance) {
+      return `Insufficient ${tokenA.symbol} balance`;
+    }
+    if (parseUnits(amountB, tokenB.decimals) > tokenBBalance) {
+      return `Insufficient ${tokenB.symbol} balance`;
+    }
     if (!poolAddress) return 'Create Pool';
     if (tokenANeedApprove) return `Approve ${tokenA.symbol}`;
     if (tokenBNeedApprove) return `Approve ${tokenB.symbol}`;
@@ -190,7 +205,7 @@ const AddLiquidity: React.FC = () => {
           className='mt-4 w-full cursor-pointer bg-gradient-to-r from-sky-500 via-blue-600 to-cyan-500 text-white font-bold text-[16px] rounded-lg'
           onClick={handleButtonClick}
           size='lg'
-          disabled={isLoading}
+          disabled={buttonDisabled()}
         >
           {buttonLabel()}
         </Button>

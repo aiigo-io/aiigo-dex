@@ -147,27 +147,31 @@ export function calculatePairedTokenAmount({
   knownToken: 'token0' | 'token1'
   knownAmountRaw: bigint | string
 }) {
-  const Token0 = new Token(token0.chainId, token0.address, token0.decimals, token0.symbol, token0.name)
-  const Token1 = new Token(token1.chainId, token1.address, token1.decimals, token1.symbol, token1.name)
-  const pool = new Pool(Token0, Token1, fee, JSBI.BigInt(sqrtPriceX96.toString()), JSBI.BigInt(1), tick)
-
-  if (knownToken === 'token0') {
-    const position = Position.fromAmount0({
-      pool,
-      tickLower,
-      tickUpper,
-      amount0: JSBI.BigInt(knownAmountRaw.toString()),
-      useFullPrecision: true,
-    })
-    return position.amount1.quotient.toString()
-  } else {
-    const position = Position.fromAmount1({
-      pool,
-      tickLower,
-      tickUpper,
-      amount1: JSBI.BigInt(knownAmountRaw.toString()),
-    })
-    return position.amount0.quotient.toString()
+  try {
+    const Token0 = new Token(token0.chainId, token0.address, token0.decimals, token0.symbol, token0.name)
+    const Token1 = new Token(token1.chainId, token1.address, token1.decimals, token1.symbol, token1.name)
+    const pool = new Pool(Token0, Token1, fee, JSBI.BigInt(sqrtPriceX96.toString()), JSBI.BigInt(1), tick)
+  
+    if (knownToken === 'token0') {
+      const position = Position.fromAmount0({
+        pool,
+        tickLower,
+        tickUpper,
+        amount0: JSBI.BigInt(knownAmountRaw.toString()),
+        useFullPrecision: true,
+      })
+      return position.amount1.quotient.toString()
+    } else {
+      const position = Position.fromAmount1({
+        pool,
+        tickLower,
+        tickUpper,
+        amount1: JSBI.BigInt(knownAmountRaw.toString()),
+      })
+      return position.amount0.quotient.toString()
+    }
+  } catch (e) {
+    return knownAmountRaw.toString();
   }
 }
 
