@@ -95,12 +95,12 @@ export const PositionItem: React.FC<{
                 </div>
                 <div className='flex-1 p-4 rounded-[14px] border flex flex-col justify-between relative'>
                   {
-                    (fees?.[0] || fees[1]) && (<Button
+                    (fees?.[0] || fees?.[1]) ? (<Button
                       size='sm'
                       className="absolute top-3 right-4 cursor-pointer"
                       variant='destructive'
                       onClick={() => claimFee()}
-                    >Claim</Button>)
+                    >Claim</Button>) : null
                   }
                   <p className='text-white font-bold text-[14px] mb-2'>Unclaimed Fee</p>
                   <div className='flex flex-col gap-2'>

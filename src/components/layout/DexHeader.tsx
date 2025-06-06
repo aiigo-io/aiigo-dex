@@ -11,11 +11,11 @@ export function DexHeader() {
   const menus = [
     {
       label: 'Swap',
-      href: '/swap',
+      href: '/swap/',
     },
     {
       label: 'Pool',
-      href: '/pool',
+      href: '/pool/',
     },
     {
       label: 'Docs',
